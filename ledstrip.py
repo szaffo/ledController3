@@ -144,7 +144,7 @@ class FadeToColor(Scene):
 
 		distances = zip(start, target)
 		distances = tuple(map(lambda x: abs(x[0] - x[1]), distances))
-		mx = max(distances[0], max(distances[1], distances[2]))
+		mx = min(distances[0], min(distances[1], distances[2]))
 
 		self.steps = mx
 		self.stepCounter = mx
@@ -172,3 +172,42 @@ class FadeToColor(Scene):
 
 	def condition(self):
 		return self.stepCounter > 0
+
+
+class Fade(Scene):
+
+	def __init__(self, strip):
+		super().__init__(strip)
+
+		self.stage = [-1,1,0]
+
+	def body(self):
+
+		# [-1,1,0] switch when r reaches 0 or g 255
+		# [0,-1,1] switch when g 0 or b 255
+		# [1,0,-1] switch when b 0 or r 255
+	
+		# [-1,1,0]
+
+		rgb = self.strip.rgb
+
+		if (((rgb[0] <= 0) or (rgb[1] >= 255)) and (self.stage == [-1,1,0])):
+			self.stage = [0,-1,1]
+			print("1")
+
+		elif (((rgb[1] <= 0) or (rgb[2] >= 255)) and (self.stage == [0,-1,1])):
+			self.stage = [1,0,-1]
+			print("2")
+
+		elif (((rgb[2] <= 0) or (rgb[0] >= 255)) and (self.stage == [1,0,-1])):
+			self.stage = [-1,1,0]
+			print("3")
+
+		newRGB = [rgb[x] + self.stage[x] for x in range(3)]
+
+		# print(rgb)
+		# print(newRGB)
+
+		self.strip.rgb = newRGB
+
+		time.sleep(0.3)
